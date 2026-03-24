@@ -47,6 +47,9 @@ export default [
 			parser: svelteParser,
 			parserOptions: {
 				parser: tsParser
+			},
+			globals: {
+				...globals.browser
 			}
 		},
 		plugins: {

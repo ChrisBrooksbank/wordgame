@@ -14,6 +14,7 @@
 	import type { HexCoord } from '$lib/engine/hexGrid.js';
 	import { hexKey } from '$lib/engine/hexGrid.js';
 	import { get as idbGet, set as idbSet } from 'idb-keyval';
+	import { recordDailyForgeCompletion } from '$lib/pwa/installPrompt.js';
 	import ForgeShareCard from '$lib/components/ForgeShareCard.svelte';
 	import ForgeWheel from '$lib/components/ForgeWheel.svelte';
 	import { loadSpinResult } from '$lib/engine/forgeWheel.js';
@@ -224,6 +225,7 @@
 		try {
 			await idbSet(`${DAILY_RESULT_PREFIX}${today}`, result);
 			previousResult = result;
+			recordDailyForgeCompletion();
 		} catch {
 			// Storage unavailable — game still ends
 		}
