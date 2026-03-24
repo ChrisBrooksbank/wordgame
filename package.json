@@ -14,7 +14,8 @@
 		"format:check": "prettier --check .",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"build:wordlist": "vite-node scripts/buildWordList.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.3.1",
