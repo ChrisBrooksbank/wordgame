@@ -13,16 +13,19 @@
 		grid: HexGrid;
 		selectedPath?: HexCoord[];
 		tileSize?: number;
+		catalystCoord?: HexCoord;
 		ontileclick?: (_c: HexCoord) => void;
 	}
 
-	let { grid, selectedPath = [], tileSize = 40, ontileclick }: Props = $props();
+	let { grid, selectedPath = [], tileSize = 40, catalystCoord, ontileclick }: Props = $props();
 
 	const coords = $derived(gridCoords(grid.size));
 
 	const bounds = $derived(computeGridBounds(coords, tileSize));
 
 	const viewBox = $derived(`${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`);
+
+	const catalystKey = $derived(catalystCoord ? hexKey(catalystCoord) : null);
 
 	const renderedTiles = $derived(
 		grid.tiles.map((tile) => {
@@ -34,7 +37,8 @@
 			const isLast =
 				selectedPath.length > 0 && hexKey(selectedPath[selectedPath.length - 1]) === key;
 			const canAdd = !isSelected && canExtendPath(selectedPath, tile.coord);
-			return { ...tile, center, points, isSelected, isLast, canAdd };
+			const isCatalyst = catalystKey !== null && key === catalystKey;
+			return { ...tile, center, points, isSelected, isLast, canAdd, isCatalyst };
 		})
 	);
 
@@ -70,9 +74,21 @@
 		>
 			<polygon
 				points={tile.points}
-				fill={tile.isLast ? '#f97316' : tile.isSelected ? '#f59e0b' : '#1f2937'}
-				stroke={tile.isSelected ? '#f97316' : tile.canAdd ? '#6b7280' : '#374151'}
-				stroke-width={tile.canAdd ? '3' : '2'}
+				fill={tile.isLast
+					? '#f97316'
+					: tile.isSelected
+						? '#f59e0b'
+						: tile.isCatalyst
+							? '#1c2a1c'
+							: '#1f2937'}
+				stroke={tile.isSelected
+					? '#f97316'
+					: tile.isCatalyst
+						? '#fbbf24'
+						: tile.canAdd
+							? '#6b7280'
+							: '#374151'}
+				stroke-width={tile.isCatalyst || tile.canAdd ? '3' : '2'}
 			/>
 			<text
 				x={tile.center.x}
