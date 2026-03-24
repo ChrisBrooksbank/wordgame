@@ -36,7 +36,7 @@
 
 ### Phase 4: Rush Mode
 
-- [ ] Build Rush Mode game screen: 4x4 hex grid, 90-second countdown timer, live score display (spec: 03-rush-mode.md)
+- [x] Build Rush Mode game screen: 4x4 hex grid, 90-second countdown timer, live score display (spec: 03-rush-mode.md)
 - [ ] Implement combo system: 1x-5x multiplier, resets after 3 seconds of inactivity, visual indicator (spec: 03-rush-mode.md)
 - [ ] Implement heat meter: tracks word frequency, highlights available 5+ letter words at max heat (spec: 03-rush-mode.md)
 - [ ] Implement adaptive difficulty: adjust letter distribution based on recent player performance (spec: 03-rush-mode.md)
