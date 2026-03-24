@@ -7,6 +7,13 @@
 	import { mulberry32 } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord, HexGrid as HexGridType } from '$lib/engine/hexGrid.js';
 	import { hexKey } from '$lib/engine/hexGrid.js';
+	import {
+		initialComboState,
+		recordWord as recordComboWord,
+		COMBO_WINDOW_MS,
+		MAX_COMBO
+	} from '$lib/engine/combo.js';
+	import type { ComboState } from '$lib/engine/combo.js';
 
 	// -------------------------------------------------------------------------
 	// Constants
@@ -38,6 +45,11 @@
 	let score = $state(0);
 	let wordsFound = $state<{ word: string; points: number }[]>([]);
 
+	// Combo system
+	let comboState = $state<ComboState>(initialComboState());
+	/** Remaining combo window in ms, updated every tick. */
+	let comboTimerMs = $state(0);
+
 	// Feedback
 	let feedback = $state<string | null>(null);
 	let feedbackType = $state<'success' | 'error'>('success');
@@ -61,6 +73,11 @@
 	});
 
 	const isUrgent = $derived(timeRemainingMs <= URGENCY_THRESHOLD_MS);
+
+	/** 0→1 progress of the active combo window. */
+	const comboProgress = $derived(comboTimerMs / COMBO_WINDOW_MS);
+
+	const comboActive = $derived(comboState.multiplier > 1 && comboTimerMs > 0);
 
 	// -------------------------------------------------------------------------
 	// Lifecycle
@@ -94,6 +111,13 @@
 			const elapsed = now - lastTick;
 			lastTick = now;
 			timeRemainingMs = Math.max(0, timeRemainingMs - elapsed);
+			// Tick combo timer and reset multiplier if window expires
+			if (comboTimerMs > 0) {
+				comboTimerMs = Math.max(0, comboTimerMs - elapsed);
+				if (comboTimerMs === 0) {
+					comboState = initialComboState();
+				}
+			}
 			if (timeRemainingMs === 0) {
 				stopTimer();
 				endGame();
@@ -156,8 +180,15 @@
 		if (result.success && result.result) {
 			const { grid: newGrid, score: scoreBreakdown, word } = result.result;
 			grid = newGrid;
-			score += scoreBreakdown.total;
-			wordsFound = [...wordsFound, { word, points: scoreBreakdown.total }];
+
+			// Apply combo multiplier
+			const { multiplier: comboMultiplier, newState } = recordComboWord(comboState, Date.now());
+			comboState = newState;
+			comboTimerMs = COMBO_WINDOW_MS;
+
+			const points = scoreBreakdown.total * comboMultiplier;
+			score += points;
+			wordsFound = [...wordsFound, { word, points }];
 			path = [];
 
 			const rarityEmoji: Record<string, string> = {
@@ -168,7 +199,8 @@
 				obscure: '💎'
 			};
 			const emoji = rarityEmoji[scoreBreakdown.rarity] ?? '';
-			showFeedback(`${word} +${scoreBreakdown.total} ${emoji}`, 'success');
+			const comboTag = comboMultiplier > 1 ? ` ×${comboMultiplier}` : '';
+			showFeedback(`${word} +${points}${comboTag} ${emoji}`, 'success');
 		} else {
 			path = [];
 			const reasonMsg: Record<string, string> = {
@@ -208,6 +240,8 @@
 		timeRemainingMs = RUSH_DURATION_MS;
 		gameStarted = false;
 		gameOver = false;
+		comboState = initialComboState();
+		comboTimerMs = 0;
 	}
 </script>
 
@@ -299,6 +333,40 @@
 		{#if !gameStarted}
 			<p class="text-sm text-gray-500">Tap a tile to start the timer</p>
 		{/if}
+
+		<!-- Combo indicator -->
+		<div class="w-full max-w-md">
+			{#if comboActive}
+				<div class="flex items-center justify-between px-1 pb-1">
+					<span
+						class="text-sm font-bold"
+						class:text-yellow-400={comboState.multiplier === 2}
+						class:text-forge-orange={comboState.multiplier === 3}
+						class:text-red-400={comboState.multiplier === 4}
+						class:text-purple-400={comboState.multiplier === 5}
+					>
+						{comboState.multiplier}× COMBO
+					</span>
+					<span class="text-xs text-gray-500">
+						{comboState.multiplier < MAX_COMBO ? 'Keep going!' : 'MAX!'}
+					</span>
+				</div>
+				<!-- Timer bar -->
+				<div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+					<div
+						class="h-full rounded-full transition-all duration-100"
+						class:bg-yellow-400={comboState.multiplier === 2}
+						class:bg-forge-orange={comboState.multiplier === 3}
+						class:bg-red-400={comboState.multiplier === 4}
+						class:bg-purple-400={comboState.multiplier === 5}
+						style="width: {(comboProgress * 100).toFixed(1)}%"
+					></div>
+				</div>
+			{:else}
+				<!-- Placeholder to keep layout stable -->
+				<div class="h-6"></div>
+			{/if}
+		</div>
 
 		<!-- Hex grid -->
 		<div class="w-full max-w-md">
