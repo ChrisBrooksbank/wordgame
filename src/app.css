@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--forge-amber: #f59e0b;
+	--forge-orange: #f97316;
+	--forge-red: #ef4444;
+}
+
+body {
+	@apply bg-gray-950 text-gray-100;
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
+}

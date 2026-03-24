@@ -3,14 +3,14 @@
 ## Status
 
 - Planning iterations: 1
-- Build iterations: 0
+- Build iterations: 1
 - Last updated: 2026-03-24
 
 ## Tasks
 
 ### Phase 1: Project Scaffolding
 
-- [ ] Scaffold SvelteKit project with TypeScript strict mode, Tailwind CSS, Vitest, ESLint, Prettier (spec: 01-core-engine.md)
+- [x] Scaffold SvelteKit project with TypeScript strict mode, Tailwind CSS, Vitest, ESLint, Prettier (spec: 01-core-engine.md)
 - [ ] Add PWA manifest stub, favicon placeholder, and basic SvelteKit routing structure (spec: 01-core-engine.md)
 
 ### Phase 2: Core Engine
