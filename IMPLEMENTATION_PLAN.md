@@ -31,7 +31,7 @@
 - [x] Implement 15-move budget tracker and 1-5 star rating system based on score thresholds (spec: 02-daily-forge.md)
 - [x] Build Daily Forge game screen: 5x5 hex grid, move counter, score display, end-of-game summary (spec: 02-daily-forge.md)
 - [x] Implement Forge Map share card: abstract word-path visualization with no spoilers, copy-to-clipboard (spec: 02-daily-forge.md)
-- [ ] Implement streak system: daily streak counter, shield bank (1 per 7-day streak, max 3), streak-break protection (spec: 02-daily-forge.md)
+- [x] Implement streak system: daily streak counter, shield bank (1 per 7-day streak, max 3), streak-break protection (spec: 02-daily-forge.md)
 - [ ] Implement Forge Wheel: daily variable-ratio reward spinner shown on puzzle completion (spec: 02-daily-forge.md)
 
 ### Phase 4: Rush Mode
