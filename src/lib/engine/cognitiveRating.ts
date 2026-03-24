@@ -342,6 +342,23 @@ export function dimensionTrend(
 // IndexedDB persistence
 // ---------------------------------------------------------------------------
 
+/**
+ * Returns the weekly snapshot with `weekStart` nearest to `targetDate`.
+ * Returns null if `snapshots` is empty.
+ */
+export function getSnapshotNearDate(
+	snapshots: WeeklySnapshot[],
+	targetDate: string
+): WeeklySnapshot | null {
+	if (snapshots.length === 0) return null;
+	const targetMs = new Date(targetDate).getTime();
+	return snapshots.reduce((nearest, snap) => {
+		const snapDiff = Math.abs(new Date(snap.weekStart).getTime() - targetMs);
+		const nearDiff = Math.abs(new Date(nearest.weekStart).getTime() - targetMs);
+		return snapDiff < nearDiff ? snap : nearest;
+	});
+}
+
 /** Load the cognitive profile store from IndexedDB; returns defaults if absent. */
 export async function loadCognitiveProfileStore(): Promise<CognitiveProfileStore> {
 	const stored = await idbGet<CognitiveProfileStore>(COGNITIVE_PROFILE_IDB_KEY);

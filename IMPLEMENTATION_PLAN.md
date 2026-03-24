@@ -61,7 +61,7 @@
 - [x] Implement Forge Rank progression: 7 tiers (Spark → Legendary), rank-up ceremony UI (spec: 06-brain-training.md)
 - [x] Build achievement system: categories aligned to cognitive dimensions, unlock notifications (spec: 06-brain-training.md)
 - [x] Implement cosmetic reward system: board skins, tile styles, trail effects — all earned via gameplay (spec: 06-brain-training.md)
-- [ ] Build radar chart visualization: 5-axis cognitive profile with trend lines, monthly shareable report (spec: 06-brain-training.md)
+- [x] Build radar chart visualization: 5-axis cognitive profile with trend lines, monthly shareable report (spec: 06-brain-training.md)
 
 ### Phase 8: Push Notifications (Cloudflare Workers)
 

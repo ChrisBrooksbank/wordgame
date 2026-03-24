@@ -15,6 +15,7 @@ import {
 	weekStart,
 	upsertWeeklySnapshot,
 	dimensionTrend,
+	getSnapshotNearDate,
 	DEFAULT_COGNITIVE_PROFILE
 } from './cognitiveRating.js';
 import type { CognitiveProfile, DimensionRating, WeeklySnapshot } from './cognitiveRating.js';
@@ -416,6 +417,54 @@ describe('upsertWeeklySnapshot', () => {
 		const result = upsertWeeklySnapshot([recent], profile, '2026-03-24');
 		const hasRecent = result.some((s) => s.weekStart === '2026-02-23');
 		expect(hasRecent).toBe(true);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// getSnapshotNearDate
+// ---------------------------------------------------------------------------
+
+describe('getSnapshotNearDate', () => {
+	const makeSnap = (weekStart: string, rating = 1000): WeeklySnapshot => ({
+		weekStart,
+		ratings: {
+			vocabularyDepth: rating,
+			processingSpeed: rating,
+			patternRecognition: rating,
+			workingMemory: rating,
+			strategicThinking: rating
+		}
+	});
+
+	it('returns null for an empty snapshots array', () => {
+		expect(getSnapshotNearDate([], '2026-03-24')).toBeNull();
+	});
+
+	it('returns the only snapshot when there is one', () => {
+		const snap = makeSnap('2026-03-23');
+		expect(getSnapshotNearDate([snap], '2026-03-24')).toEqual(snap);
+	});
+
+	it('returns the snapshot nearest to the target date', () => {
+		const near = makeSnap('2026-02-23'); // 29 days before 2026-03-24
+		const far = makeSnap('2026-01-05'); // 78 days before 2026-03-24
+		expect(getSnapshotNearDate([far, near], '2026-03-24')).toEqual(near);
+	});
+
+	it('returns the correct snapshot when target is between two equidistant snaps', () => {
+		// 2026-03-17 is 7 days before, 2026-03-31 is 7 days after target 2026-03-24
+		const before = makeSnap('2026-03-17', 1100);
+		const after = makeSnap('2026-03-31', 1200);
+		// Either is valid for exactly equidistant; just check it returns one of them
+		const result = getSnapshotNearDate([before, after], '2026-03-24');
+		expect([before, after]).toContainEqual(result);
+	});
+
+	it('does not mutate the input array', () => {
+		const snaps = [makeSnap('2026-03-09'), makeSnap('2026-03-16')];
+		const copy = [...snaps];
+		getSnapshotNearDate(snaps, '2026-03-24');
+		expect(snaps).toEqual(copy);
 	});
 });
 
