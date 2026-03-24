@@ -5,6 +5,7 @@ import {
 	generateDailyPuzzle,
 	todayUTC,
 	DAILY_MOVE_BUDGET,
+	puzzleDayNumber,
 	calculateStarThresholds,
 	getStarRating,
 	type StarThresholds
@@ -218,5 +219,34 @@ describe('getStarRating', () => {
 		expect(getStarRating(0, t)).toBe(1);
 		expect(getStarRating(t.five, t)).toBe(5);
 		expect(getStarRating(t.five - 1, t)).toBe(4);
+	});
+});
+
+describe('puzzleDayNumber', () => {
+	it('returns 1 for the epoch date 2026-01-01', () => {
+		expect(puzzleDayNumber('2026-01-01')).toBe(1);
+	});
+
+	it('returns 2 for 2026-01-02', () => {
+		expect(puzzleDayNumber('2026-01-02')).toBe(2);
+	});
+
+	it('increments by 1 per day', () => {
+		expect(puzzleDayNumber('2026-03-24')).toBe(puzzleDayNumber('2026-03-23') + 1);
+	});
+
+	it('is deterministic for the same date', () => {
+		expect(puzzleDayNumber('2026-06-15')).toBe(puzzleDayNumber('2026-06-15'));
+	});
+
+	it('returns a positive integer for dates after the epoch', () => {
+		const n = puzzleDayNumber('2026-12-31');
+		expect(Number.isInteger(n)).toBe(true);
+		expect(n).toBeGreaterThan(0);
+	});
+
+	it('returns 366 for 2027-01-01 (one year after epoch)', () => {
+		// 2026 is not a leap year → 365 days → day 366 = 2027-01-01
+		expect(puzzleDayNumber('2027-01-01')).toBe(366);
 	});
 });

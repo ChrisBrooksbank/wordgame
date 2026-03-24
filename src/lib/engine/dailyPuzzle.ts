@@ -65,6 +65,23 @@ export function todayUTC(): string {
 }
 
 // ---------------------------------------------------------------------------
+// Puzzle day number
+// ---------------------------------------------------------------------------
+
+/** Epoch date for puzzle numbering: Day 1 = 2026-01-01 (UTC). */
+const PUZZLE_EPOCH_MS = Date.UTC(2026, 0, 1);
+
+/**
+ * Returns the 1-based sequential puzzle number for a given UTC date string.
+ * Day 1 = 2026-01-01. Dates before the epoch return ≤ 0.
+ */
+export function puzzleDayNumber(dateStr: string = todayUTC()): number {
+	const [y, m, d] = dateStr.split('-').map(Number);
+	const dateMs = Date.UTC(y, m - 1, d);
+	return Math.floor((dateMs - PUZZLE_EPOCH_MS) / 86_400_000) + 1;
+}
+
+// ---------------------------------------------------------------------------
 // Daily puzzle
 // ---------------------------------------------------------------------------
 

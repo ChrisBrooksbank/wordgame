@@ -14,6 +14,7 @@
 	import type { HexCoord } from '$lib/engine/hexGrid.js';
 	import { hexKey } from '$lib/engine/hexGrid.js';
 	import { get as idbGet, set as idbSet } from 'idb-keyval';
+	import ForgeShareCard from '$lib/components/ForgeShareCard.svelte';
 
 	// -------------------------------------------------------------------------
 	// Types
@@ -266,6 +267,13 @@
 					{/each}
 				</div>
 			</div>
+			<ForgeShareCard
+				date={previousResult.date}
+				score={previousResult.score}
+				stars={previousResult.stars}
+				wordsFound={previousResult.wordsFound}
+				movesUsed={previousResult.movesUsed}
+			/>
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
 	{:else if gameOver && previousResult}
@@ -286,6 +294,13 @@
 					{/each}
 				</div>
 			</div>
+			<ForgeShareCard
+				date={previousResult.date}
+				score={previousResult.score}
+				stars={previousResult.stars}
+				wordsFound={previousResult.wordsFound}
+				movesUsed={previousResult.movesUsed}
+			/>
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
 	{:else if grid && puzzle}
