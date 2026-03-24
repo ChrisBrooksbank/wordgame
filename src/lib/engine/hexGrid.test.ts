@@ -12,7 +12,8 @@ import {
 	generateGrid,
 	getTile,
 	coordInGrid,
-	weightedRandomLetter
+	weightedRandomLetter,
+	computeGridBounds
 } from './hexGrid.js';
 
 describe('hexEqual', () => {
@@ -247,6 +248,51 @@ describe('getTile / coordInGrid', () => {
 		seed = 0;
 		const grid = generateGrid('4x4', mockRng);
 		expect(coordInGrid(grid, { q: 999, r: 999 })).toBe(false);
+	});
+});
+
+describe('computeGridBounds', () => {
+	it('returns zeros for empty coords', () => {
+		const bounds = computeGridBounds([], 32);
+		expect(bounds).toEqual({ minX: 0, minY: 0, width: 0, height: 0 });
+	});
+
+	it('origin-only grid has non-zero width and height from padding', () => {
+		const bounds = computeGridBounds([{ q: 0, r: 0 }], 32);
+		expect(bounds.width).toBeGreaterThan(0);
+		expect(bounds.height).toBeGreaterThan(0);
+	});
+
+	it('width grows when more tiles are added horizontally', () => {
+		const single = computeGridBounds([{ q: 0, r: 0 }], 32);
+		const two = computeGridBounds(
+			[
+				{ q: 0, r: 0 },
+				{ q: 1, r: 0 }
+			],
+			32
+		);
+		expect(two.width).toBeGreaterThan(single.width);
+	});
+
+	it('respects custom padding', () => {
+		const small = computeGridBounds([{ q: 0, r: 0 }], 32, 10);
+		const large = computeGridBounds([{ q: 0, r: 0 }], 32, 50);
+		expect(large.width).toBeGreaterThan(small.width);
+		expect(large.height).toBeGreaterThan(small.height);
+	});
+
+	it('5x5 grid bounds contain all tile centers', () => {
+		const size = 32;
+		const coords = gridCoords('5x5');
+		const bounds = computeGridBounds(coords, size);
+		for (const coord of coords) {
+			const { x, y } = hexToPixel(coord, size);
+			expect(x).toBeGreaterThanOrEqual(bounds.minX);
+			expect(y).toBeGreaterThanOrEqual(bounds.minY);
+			expect(x).toBeLessThanOrEqual(bounds.minX + bounds.width);
+			expect(y).toBeLessThanOrEqual(bounds.minY + bounds.height);
+		}
 	});
 });
 

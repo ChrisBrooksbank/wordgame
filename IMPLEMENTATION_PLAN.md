@@ -19,7 +19,7 @@
 - [x] Build word list compiler script: read ~280k word corpus, output DAWG/Trie binary to static/ (spec: 01-core-engine.md)
 - [x] Implement DAWG/Trie word validator: load binary, isWord(), isPrefix() methods + unit tests (spec: 01-core-engine.md)
 - [x] Implement scoring system: length² base score, rarity multipliers (1x-5x) lookup table + unit tests (spec: 01-core-engine.md)
-- [ ] Implement SVG hex grid renderer component: pointy-top hexes, tile display, responsive sizing (spec: 01-core-engine.md)
+- [x] Implement SVG hex grid renderer component: pointy-top hexes, tile display, responsive sizing (spec: 01-core-engine.md)
 - [ ] Implement tile selection mechanic: path building, adjacency validation, path visualization on SVG (spec: 01-core-engine.md)
 - [ ] Implement forge mechanic: word submission, tile consumption, gravity (tiles fall), new tile generation + tests (spec: 01-core-engine.md)
 - [ ] Implement Svelte stores + IndexedDB persistence via idb-keyval: game state save/restore (spec: 01-core-engine.md)

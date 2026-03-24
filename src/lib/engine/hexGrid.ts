@@ -242,6 +242,28 @@ export function generateGrid(size: GridSize, rng: () => number): HexGrid {
 }
 
 /**
+ * Computes the bounding box (in SVG pixels) for a set of hex coordinates.
+ * Useful for generating a responsive viewBox.
+ */
+export function computeGridBounds(
+	coords: HexCoord[],
+	tileSize: number,
+	padding = tileSize
+): { minX: number; minY: number; width: number; height: number } {
+	if (coords.length === 0) {
+		return { minX: 0, minY: 0, width: 0, height: 0 };
+	}
+	const centers = coords.map((c) => hexToPixel(c, tileSize));
+	const xs = centers.map((p) => p.x);
+	const ys = centers.map((p) => p.y);
+	const minX = Math.min(...xs) - padding;
+	const minY = Math.min(...ys) - padding;
+	const maxX = Math.max(...xs) + padding;
+	const maxY = Math.max(...ys) + padding;
+	return { minX, minY, width: maxX - minX, height: maxY - minY };
+}
+
+/**
  * Looks up a tile by its coordinate. Returns undefined if not found.
  */
 export function getTile(grid: HexGrid, coord: HexCoord): HexTile | undefined {
