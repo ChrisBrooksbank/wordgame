@@ -15,7 +15,7 @@
 
 ### Phase 2: Core Engine
 
-- [ ] Implement hex grid data model: axial coordinates (q,r), adjacency calculation, support for 4x4/5x5/5x8 grid sizes + unit tests (spec: 01-core-engine.md)
+- [x] Implement hex grid data model: axial coordinates (q,r), adjacency calculation, support for 4x4/5x5/5x8 grid sizes + unit tests (spec: 01-core-engine.md)
 - [ ] Build word list compiler script: read ~280k word corpus, output DAWG/Trie binary to static/ (spec: 01-core-engine.md)
 - [ ] Implement DAWG/Trie word validator: load binary, isWord(), isPrefix() methods + unit tests (spec: 01-core-engine.md)
 - [ ] Implement scoring system: length² base score, rarity multipliers (1x-5x) lookup table + unit tests (spec: 01-core-engine.md)
