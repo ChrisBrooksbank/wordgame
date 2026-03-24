@@ -276,3 +276,16 @@ export function getTile(grid: HexGrid, coord: HexCoord): HexTile | undefined {
 export function coordInGrid(grid: HexGrid, coord: HexCoord): boolean {
 	return getTile(grid, coord) !== undefined;
 }
+
+/**
+ * Returns true if `coord` can be appended to `path`:
+ * - path is empty (any tile can start a path)
+ * - coord is adjacent to the last tile in path
+ * - coord is not already in path
+ */
+export function canExtendPath(path: HexCoord[], coord: HexCoord): boolean {
+	if (path.length === 0) return true;
+	const key = hexKey(coord);
+	if (path.some((c) => hexKey(c) === key)) return false;
+	return hexAdjacent(path[path.length - 1], coord);
+}

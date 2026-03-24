@@ -5,16 +5,18 @@
 		hexCorners,
 		hexKey,
 		computeGridBounds,
-		gridCoords
+		gridCoords,
+		canExtendPath
 	} from '$lib/engine/hexGrid.js';
 
 	interface Props {
 		grid: HexGrid;
 		selectedPath?: HexCoord[];
 		tileSize?: number;
+		ontileclick?: (_c: HexCoord) => void;
 	}
 
-	let { grid, selectedPath = [], tileSize = 40 }: Props = $props();
+	let { grid, selectedPath = [], tileSize = 40, ontileclick }: Props = $props();
 
 	const coords = $derived(gridCoords(grid.size));
 
@@ -29,8 +31,21 @@
 			const points = corners.map((c) => `${c.x},${c.y}`).join(' ');
 			const key = hexKey(tile.coord);
 			const isSelected = selectedPath.some((c) => hexKey(c) === key);
-			return { ...tile, center, points, isSelected };
+			const isLast =
+				selectedPath.length > 0 && hexKey(selectedPath[selectedPath.length - 1]) === key;
+			const canAdd = !isSelected && canExtendPath(selectedPath, tile.coord);
+			return { ...tile, center, points, isSelected, isLast, canAdd };
 		})
+	);
+
+	// Polyline points connecting selected tile centers in order
+	const pathLinePoints = $derived(
+		selectedPath
+			.map((coord) => {
+				const center = hexToPixel(coord, tileSize);
+				return `${center.x},${center.y}`;
+			})
+			.join(' ')
 	);
 </script>
 
@@ -42,12 +57,22 @@
 	aria-label="Hexagonal letter grid"
 >
 	{#each renderedTiles as tile (tile.id)}
-		<g>
+		<g
+			role="button"
+			tabindex="0"
+			aria-label="Tile {tile.letter}"
+			aria-pressed={tile.isSelected}
+			onclick={() => ontileclick?.(tile.coord)}
+			onkeydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') ontileclick?.(tile.coord);
+			}}
+			style="cursor: {ontileclick ? 'pointer' : 'default'}"
+		>
 			<polygon
 				points={tile.points}
-				fill={tile.isSelected ? '#f59e0b' : '#1f2937'}
-				stroke={tile.isSelected ? '#f97316' : '#374151'}
-				stroke-width="2"
+				fill={tile.isLast ? '#f97316' : tile.isSelected ? '#f59e0b' : '#1f2937'}
+				stroke={tile.isSelected ? '#f97316' : tile.canAdd ? '#6b7280' : '#374151'}
+				stroke-width={tile.canAdd ? '3' : '2'}
 			/>
 			<text
 				x={tile.center.x}
@@ -63,4 +88,17 @@
 			</text>
 		</g>
 	{/each}
+
+	{#if selectedPath.length >= 2}
+		<polyline
+			points={pathLinePoints}
+			fill="none"
+			stroke="#f97316"
+			stroke-width="3"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			opacity="0.7"
+			pointer-events="none"
+		/>
+	{/if}
 </svg>

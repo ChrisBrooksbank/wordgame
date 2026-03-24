@@ -13,7 +13,8 @@ import {
 	getTile,
 	coordInGrid,
 	weightedRandomLetter,
-	computeGridBounds
+	computeGridBounds,
+	canExtendPath
 } from './hexGrid.js';
 
 describe('hexEqual', () => {
@@ -293,6 +294,50 @@ describe('computeGridBounds', () => {
 			expect(x).toBeLessThanOrEqual(bounds.minX + bounds.width);
 			expect(y).toBeLessThanOrEqual(bounds.minY + bounds.height);
 		}
+	});
+});
+
+describe('canExtendPath', () => {
+	it('empty path allows any tile', () => {
+		expect(canExtendPath([], { q: 0, r: 0 })).toBe(true);
+		expect(canExtendPath([], { q: 5, r: -3 })).toBe(true);
+	});
+	it('can extend to adjacent tile', () => {
+		const path = [{ q: 0, r: 0 }];
+		expect(canExtendPath(path, { q: 1, r: 0 })).toBe(true);
+	});
+	it('cannot extend to non-adjacent tile', () => {
+		const path = [{ q: 0, r: 0 }];
+		expect(canExtendPath(path, { q: 2, r: 0 })).toBe(false);
+	});
+	it('cannot extend to already-selected tile', () => {
+		const path = [
+			{ q: 0, r: 0 },
+			{ q: 1, r: 0 }
+		];
+		expect(canExtendPath(path, { q: 0, r: 0 })).toBe(false);
+	});
+	it('adjacency is checked against last tile in path', () => {
+		// path ends at (1,0); (0,0) is adjacent to (1,0) but already in path
+		// (1,-1) is adjacent to (1,0) and not in path
+		const path = [
+			{ q: 0, r: 0 },
+			{ q: 1, r: 0 }
+		];
+		expect(canExtendPath(path, { q: 1, r: -1 })).toBe(true);
+		// (-1,0) is adjacent to (0,0) but NOT to (1,0)
+		expect(canExtendPath(path, { q: -1, r: 0 })).toBe(false);
+	});
+	it('multi-step path only allows extension from last tile', () => {
+		const path = [
+			{ q: 0, r: 0 },
+			{ q: 1, r: 0 },
+			{ q: 1, r: -1 }
+		];
+		// (0,-1) is adjacent to (1,-1)
+		expect(canExtendPath(path, { q: 0, r: -1 })).toBe(true);
+		// (0,1) is adjacent to (0,0) but not to last tile (1,-1)
+		expect(canExtendPath(path, { q: 0, r: 1 })).toBe(false);
 	});
 });
 
