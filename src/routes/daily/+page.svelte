@@ -15,6 +15,9 @@
 	import { hexKey } from '$lib/engine/hexGrid.js';
 	import { get as idbGet, set as idbSet } from 'idb-keyval';
 	import ForgeShareCard from '$lib/components/ForgeShareCard.svelte';
+	import ForgeWheel from '$lib/components/ForgeWheel.svelte';
+	import { loadSpinResult } from '$lib/engine/forgeWheel.js';
+	import type { SpinResult } from '$lib/engine/forgeWheel.js';
 
 	// -------------------------------------------------------------------------
 	// Types
@@ -56,6 +59,9 @@
 	let alreadyCompleted = $state(false);
 	let previousResult = $state<DailyResult | null>(null);
 
+	// Forge Wheel
+	let wheelSpinResult = $state<SpinResult | null>(null);
+
 	// Validator
 	let validator: Awaited<ReturnType<typeof loadWordValidator>> | null = null;
 
@@ -92,6 +98,7 @@
 			if (saved) {
 				alreadyCompleted = true;
 				previousResult = saved;
+				wheelSpinResult = await loadSpinResult(today);
 				loading = false;
 				return;
 			}
@@ -274,6 +281,13 @@
 				wordsFound={previousResult.wordsFound}
 				movesUsed={previousResult.movesUsed}
 			/>
+			<ForgeWheel
+				date={previousResult.date}
+				previousResult={wheelSpinResult}
+				onspun={(r) => {
+					wheelSpinResult = r;
+				}}
+			/>
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
 	{:else if gameOver && previousResult}
@@ -300,6 +314,13 @@
 				stars={previousResult.stars}
 				wordsFound={previousResult.wordsFound}
 				movesUsed={previousResult.movesUsed}
+			/>
+			<ForgeWheel
+				date={previousResult.date}
+				previousResult={wheelSpinResult}
+				onspun={(r) => {
+					wheelSpinResult = r;
+				}}
 			/>
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
