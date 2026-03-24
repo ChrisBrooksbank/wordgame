@@ -11,7 +11,7 @@
 ### Phase 1: Project Scaffolding
 
 - [x] Scaffold SvelteKit project with TypeScript strict mode, Tailwind CSS, Vitest, ESLint, Prettier (spec: 01-core-engine.md)
-- [ ] Add PWA manifest stub, favicon placeholder, and basic SvelteKit routing structure (spec: 01-core-engine.md)
+- [x] Add PWA manifest stub, favicon placeholder, and basic SvelteKit routing structure (spec: 01-core-engine.md)
 
 ### Phase 2: Core Engine
 
