@@ -21,6 +21,15 @@
 		generateRushGrid
 	} from '$lib/engine/adaptiveDifficulty.js';
 	import type { DifficultyProfile } from '$lib/engine/adaptiveDifficulty.js';
+	import {
+		loadPersonalBests,
+		savePersonalBests,
+		updatePersonalBests,
+		anyBroken,
+		longestWordFromList,
+		DEFAULT_RUSH_PERSONAL_BESTS
+	} from '$lib/engine/rushPersonalBests.js';
+	import type { RushPersonalBests, BrokenBests } from '$lib/engine/rushPersonalBests.js';
 	import { get as idbGet, set as idbSet } from 'idb-keyval';
 
 	// -------------------------------------------------------------------------
@@ -58,6 +67,8 @@
 	let comboState = $state<ComboState>(initialComboState());
 	/** Remaining combo window in ms, updated every tick. */
 	let comboTimerMs = $state(0);
+	/** Peak combo multiplier reached this game. */
+	let peakCombo = $state(1);
 
 	// Heat meter
 	let heatState = $state<HeatState>(initialHeatState(() => Math.random()));
@@ -66,6 +77,10 @@
 
 	// Adaptive difficulty
 	let difficultyProfile = $state<DifficultyProfile>(getDefaultDifficultyProfile());
+
+	// Personal bests
+	let personalBests = $state<RushPersonalBests>({ ...DEFAULT_RUSH_PERSONAL_BESTS });
+	let brokenBests = $state<BrokenBests | null>(null);
 
 	// Feedback
 	let feedback = $state<string | null>(null);
@@ -102,12 +117,14 @@
 
 	onMount(async () => {
 		try {
-			const [loadedValidator, storedProfile] = await Promise.all([
+			const [loadedValidator, storedProfile, storedBests] = await Promise.all([
 				loadWordValidator(),
-				idbGet<DifficultyProfile>(DIFFICULTY_IDB_KEY)
+				idbGet<DifficultyProfile>(DIFFICULTY_IDB_KEY),
+				loadPersonalBests()
 			]);
 			validator = loadedValidator;
 			if (storedProfile) difficultyProfile = storedProfile;
+			personalBests = storedBests;
 			rng = mulberry32(Math.floor(Date.now()));
 			grid = generateRushGrid('4x4', rng, difficultyProfile.level);
 			loading = false;
@@ -218,6 +235,7 @@
 			const points = scoreBreakdown.total * comboMultiplier;
 			score += points;
 			wordsFound = [...wordsFound, { word, points }];
+			if (comboMultiplier > peakCombo) peakCombo = comboMultiplier;
 			path = [];
 
 			// Update heat meter
@@ -283,6 +301,23 @@
 		idbSet(DIFFICULTY_IDB_KEY, newProfile).catch(() => {
 			// Storage failure is non-fatal
 		});
+
+		// Update and persist personal bests
+		const gameWords = wordsFound.map((w) => w.word);
+		const { updated, broken } = updatePersonalBests(
+			personalBests,
+			score,
+			peakCombo,
+			wordsFound.length,
+			longestWordFromList(gameWords)
+		);
+		personalBests = updated;
+		if (anyBroken(broken)) {
+			brokenBests = broken;
+		}
+		savePersonalBests(updated).catch(() => {
+			// Storage failure is non-fatal
+		});
 	}
 
 	// -------------------------------------------------------------------------
@@ -302,8 +337,10 @@
 		gameOver = false;
 		comboState = initialComboState();
 		comboTimerMs = 0;
+		peakCombo = 1;
 		heatState = initialHeatState(() => Math.random());
 		highlightedTiles = new Set();
+		brokenBests = null;
 	}
 </script>
 
@@ -343,6 +380,49 @@
 						class:text-red-400={difficultyProfile.level === 'hard'}>{difficultyProfile.level}</span
 					> · next game adjusts automatically
 				</p>
+
+				{#if brokenBests}
+					<div class="mt-4 rounded-lg border border-yellow-600 bg-yellow-950 px-4 py-3 text-left">
+						<p class="mb-2 text-xs font-bold text-yellow-400">New Personal Best!</p>
+						<ul class="space-y-1 text-xs text-yellow-300">
+							{#if brokenBests.highScore}
+								<li>High Score: {personalBests.highScore.toLocaleString()} pts</li>
+							{/if}
+							{#if brokenBests.bestComboStreak}
+								<li>Best Combo: {personalBests.bestComboStreak}×</li>
+							{/if}
+							{#if brokenBests.mostWords}
+								<li>Most Words: {personalBests.mostWords}</li>
+							{/if}
+							{#if brokenBests.longestWord}
+								<li>Longest Word: {personalBests.longestWord}</li>
+							{/if}
+						</ul>
+					</div>
+				{/if}
+
+				<!-- Personal bests summary -->
+				<div class="mt-4 border-t border-gray-800 pt-4">
+					<p class="mb-2 text-xs text-gray-500">Personal Bests</p>
+					<div class="grid grid-cols-2 gap-2 text-xs">
+						<div class="rounded bg-gray-800 px-3 py-2 text-left">
+							<p class="text-gray-500">High Score</p>
+							<p class="font-bold text-gray-100">{personalBests.highScore.toLocaleString()}</p>
+						</div>
+						<div class="rounded bg-gray-800 px-3 py-2 text-left">
+							<p class="text-gray-500">Best Combo</p>
+							<p class="font-bold text-gray-100">{personalBests.bestComboStreak}×</p>
+						</div>
+						<div class="rounded bg-gray-800 px-3 py-2 text-left">
+							<p class="text-gray-500">Most Words</p>
+							<p class="font-bold text-gray-100">{personalBests.mostWords}</p>
+						</div>
+						<div class="rounded bg-gray-800 px-3 py-2 text-left">
+							<p class="text-gray-500">Longest Word</p>
+							<p class="font-bold text-gray-100">{personalBests.longestWord || '—'}</p>
+						</div>
+					</div>
+				</div>
 
 				{#if wordsFound.length > 0}
 					<div class="mt-4 border-t border-gray-800 pt-4">

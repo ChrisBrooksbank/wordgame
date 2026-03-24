@@ -40,7 +40,7 @@
 - [x] Implement combo system: 1x-5x multiplier, resets after 3 seconds of inactivity, visual indicator (spec: 03-rush-mode.md)
 - [x] Implement heat meter: tracks word frequency, highlights available 5+ letter words at max heat (spec: 03-rush-mode.md)
 - [x] Implement adaptive difficulty: adjust letter distribution based on recent player performance (spec: 03-rush-mode.md)
-- [ ] Implement personal best tracking: high score, best combo streak, most words, longest word (spec: 03-rush-mode.md)
+- [x] Implement personal best tracking: high score, best combo streak, most words, longest word (spec: 03-rush-mode.md)
 
 ### Phase 5: PWA Infrastructure
 
