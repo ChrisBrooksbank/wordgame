@@ -135,7 +135,7 @@ export function hexRingCoords(radius: number): HexCoord[] {
 /**
  * English letter frequency weights (A–Z).
  */
-const LETTER_WEIGHTS: Record<string, number> = {
+export const LETTER_WEIGHTS: Record<string, number> = {
 	A: 8.17,
 	B: 1.49,
 	C: 2.78,

@@ -2,7 +2,6 @@
 	import { onMount, onDestroy } from 'svelte';
 	import HexGrid from '$lib/components/HexGrid.svelte';
 	import { loadWordValidator } from '$lib/engine/wordValidator.js';
-	import { generateGrid } from '$lib/engine/hexGrid.js';
 	import { submitWord, pathToWord } from '$lib/engine/forgeEngine.js';
 	import { mulberry32 } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord, HexGrid as HexGridType } from '$lib/engine/hexGrid.js';
@@ -16,6 +15,13 @@
 	import type { ComboState } from '$lib/engine/combo.js';
 	import { initialHeatState, addHeat, tickHeat, findLongWordTiles } from '$lib/engine/heatMeter.js';
 	import type { HeatState } from '$lib/engine/heatMeter.js';
+	import {
+		getDefaultDifficultyProfile,
+		updateDifficultyProfile,
+		generateRushGrid
+	} from '$lib/engine/adaptiveDifficulty.js';
+	import type { DifficultyProfile } from '$lib/engine/adaptiveDifficulty.js';
+	import { get as idbGet, set as idbSet } from 'idb-keyval';
 
 	// -------------------------------------------------------------------------
 	// Constants
@@ -23,6 +29,7 @@
 
 	const RUSH_DURATION_MS = 90_000;
 	const URGENCY_THRESHOLD_MS = 15_000;
+	const DIFFICULTY_IDB_KEY = 'lexicon-forge:rush-difficulty';
 
 	// -------------------------------------------------------------------------
 	// State
@@ -56,6 +63,9 @@
 	let heatState = $state<HeatState>(initialHeatState(() => Math.random()));
 	/** Tile keys (hexKey) highlighted during max-heat activation. */
 	let highlightedTiles = $state<Set<string>>(new Set());
+
+	// Adaptive difficulty
+	let difficultyProfile = $state<DifficultyProfile>(getDefaultDifficultyProfile());
 
 	// Feedback
 	let feedback = $state<string | null>(null);
@@ -92,9 +102,14 @@
 
 	onMount(async () => {
 		try {
-			validator = await loadWordValidator();
+			const [loadedValidator, storedProfile] = await Promise.all([
+				loadWordValidator(),
+				idbGet<DifficultyProfile>(DIFFICULTY_IDB_KEY)
+			]);
+			validator = loadedValidator;
+			if (storedProfile) difficultyProfile = storedProfile;
 			rng = mulberry32(Math.floor(Date.now()));
-			grid = generateGrid('4x4', rng);
+			grid = generateRushGrid('4x4', rng, difficultyProfile.level);
 			loading = false;
 		} catch (e) {
 			loadError = e instanceof Error ? e.message : 'Failed to load';
@@ -255,6 +270,19 @@
 		gameOver = true;
 		path = [];
 		highlightedTiles = new Set();
+
+		// Update and persist difficulty profile based on this game's performance
+		const elapsed = RUSH_DURATION_MS - timeRemainingMs;
+		const newProfile = updateDifficultyProfile(
+			difficultyProfile,
+			score,
+			wordsFound.length,
+			elapsed
+		);
+		difficultyProfile = newProfile;
+		idbSet(DIFFICULTY_IDB_KEY, newProfile).catch(() => {
+			// Storage failure is non-fatal
+		});
 	}
 
 	// -------------------------------------------------------------------------
@@ -264,7 +292,7 @@
 	function newGame() {
 		stopTimer();
 		rng = mulberry32(Math.floor(Date.now()));
-		grid = generateGrid('4x4', rng);
+		grid = generateRushGrid('4x4', rng, difficultyProfile.level);
 		path = [];
 		score = 0;
 		wordsFound = [];
@@ -307,6 +335,13 @@
 				<p class="text-4xl font-bold text-forge-orange">{score.toLocaleString()}</p>
 				<p class="mt-1 text-sm text-gray-500">
 					pts · {wordsFound.length} word{wordsFound.length !== 1 ? 's' : ''}
+				</p>
+				<p class="mt-1 text-xs text-gray-600">
+					Difficulty: <span
+						class:text-green-400={difficultyProfile.level === 'easy'}
+						class:text-gray-400={difficultyProfile.level === 'normal'}
+						class:text-red-400={difficultyProfile.level === 'hard'}>{difficultyProfile.level}</span
+					> · next game adjusts automatically
 				</p>
 
 				{#if wordsFound.length > 0}
