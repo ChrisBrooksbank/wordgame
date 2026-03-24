@@ -53,7 +53,7 @@
 
 - [x] Build Memory Crucible mode: 4x4 hex, show tiles briefly (8s→2s decreasing), play from memory, 3-strike game over (spec: 05-remaining-modes.md)
 - [x] Build Architect mode: rectangular grid, place letter fragments, difficulty tiers (4x4→7x7), par scoring + 3-star rating (spec: 05-remaining-modes.md)
-- [ ] Build Cascade mode: 5x8 hex grid, auto-forge detection after gravity settle, chain multipliers (1-chain=1x, 4+=30x), 20-move budget (spec: 05-remaining-modes.md)
+- [x] Build Cascade mode: 5x8 hex grid, auto-forge detection after gravity settle, chain multipliers (1-chain=1x, 4+=30x), 20-move budget (spec: 05-remaining-modes.md)
 
 ### Phase 7: Brain Training & Progression
 
