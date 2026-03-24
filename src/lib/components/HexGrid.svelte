@@ -18,6 +18,8 @@
 		highlightedTiles?: Set<string>;
 		/** Heat level 0–1 for glow intensity effect. */
 		heatLevel?: number;
+		/** When true, tile letters are hidden (face-down) — used in Memory Crucible. */
+		hideTiles?: boolean;
 		ontileclick?: (_c: HexCoord) => void;
 	}
 
@@ -28,6 +30,7 @@
 		catalystCoord,
 		highlightedTiles,
 		heatLevel = 0,
+		hideTiles = false,
 		ontileclick
 	}: Props = $props();
 
@@ -110,18 +113,22 @@
 								: '#374151'}
 				stroke-width={tile.isCatalyst || tile.isHeatHighlighted || tile.canAdd ? '3' : '2'}
 			/>
-			<text
-				x={tile.center.x}
-				y={tile.center.y}
-				text-anchor="middle"
-				dominant-baseline="central"
-				fill={tile.isSelected ? '#1f2937' : '#f3f4f6'}
-				font-size={tileSize * 0.45}
-				font-weight="bold"
-				font-family="system-ui, sans-serif"
-			>
-				{tile.letter}
-			</text>
+			{#if hideTiles && !tile.isSelected}
+				<circle cx={tile.center.x} cy={tile.center.y} r={tileSize * 0.12} fill="#4b5563" />
+			{:else}
+				<text
+					x={tile.center.x}
+					y={tile.center.y}
+					text-anchor="middle"
+					dominant-baseline="central"
+					fill={tile.isSelected ? '#1f2937' : '#f3f4f6'}
+					font-size={tileSize * 0.45}
+					font-weight="bold"
+					font-family="system-ui, sans-serif"
+				>
+					{tile.letter}
+				</text>
+			{/if}
 		</g>
 	{/each}
 
