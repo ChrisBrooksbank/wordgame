@@ -22,7 +22,7 @@
 - [x] Implement SVG hex grid renderer component: pointy-top hexes, tile display, responsive sizing (spec: 01-core-engine.md)
 - [x] Implement tile selection mechanic: path building, adjacency validation, path visualization on SVG (spec: 01-core-engine.md)
 - [x] Implement forge mechanic: word submission, tile consumption, gravity (tiles fall), new tile generation + tests (spec: 01-core-engine.md)
-- [ ] Implement Svelte stores + IndexedDB persistence via idb-keyval: game state save/restore (spec: 01-core-engine.md)
+- [x] Implement Svelte stores + IndexedDB persistence via idb-keyval: game state save/restore (spec: 01-core-engine.md)
 
 ### Phase 3: Daily Forge Mode
 
