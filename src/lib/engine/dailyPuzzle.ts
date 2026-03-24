@@ -9,6 +9,13 @@
 import { generateGrid, hexEqual, type HexGrid, type HexTile } from './hexGrid.js';
 
 // ---------------------------------------------------------------------------
+// Daily Forge constants
+// ---------------------------------------------------------------------------
+
+/** Maximum number of word submissions allowed in a Daily Forge game. */
+export const DAILY_MOVE_BUDGET = 15;
+
+// ---------------------------------------------------------------------------
 // PRNG
 // ---------------------------------------------------------------------------
 
@@ -90,4 +97,94 @@ export function generateDailyPuzzle(dateStr: string = todayUTC()): DailyPuzzle {
 	}
 
 	return { date: dateStr, grid, catalystTile, seed };
+}
+
+// ---------------------------------------------------------------------------
+// Star rating
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimum score thresholds to reach each star level (2–5).
+ * Scores below the `two` threshold receive 1 star (completing the puzzle
+ * always awards at least 1 star).
+ */
+export interface StarThresholds {
+	two: number;
+	three: number;
+	four: number;
+	five: number;
+}
+
+/** English letter frequencies (percent, A–Z) — used for threshold estimation. */
+const LETTER_FREQ: Record<string, number> = {
+	A: 8.17,
+	B: 1.49,
+	C: 2.78,
+	D: 4.25,
+	E: 12.7,
+	F: 2.23,
+	G: 2.02,
+	H: 6.09,
+	I: 6.97,
+	J: 0.15,
+	K: 0.77,
+	L: 4.03,
+	M: 2.41,
+	N: 6.75,
+	O: 7.51,
+	P: 1.93,
+	Q: 0.1,
+	R: 5.99,
+	S: 6.33,
+	T: 9.06,
+	U: 2.76,
+	V: 0.98,
+	W: 2.36,
+	X: 0.15,
+	Y: 1.97,
+	Z: 0.07
+};
+
+/**
+ * Maps an average letter frequency (percent) to an estimated rarity multiplier.
+ * Mirrors the rarity thresholds used in scoring.ts.
+ */
+function freqToMultiplier(avgFreq: number): 1 | 2 | 3 | 4 | 5 {
+	if (avgFreq >= 5.0) return 1;
+	if (avgFreq >= 3.5) return 2;
+	if (avgFreq >= 2.5) return 3;
+	if (avgFreq >= 1.5) return 4;
+	return 5;
+}
+
+/**
+ * Calculates per-puzzle star thresholds based on the puzzle's tile letter distribution.
+ *
+ * Theoretical max = DAILY_MOVE_BUDGET × (average 5-letter word base = 25) × estimated multiplier.
+ * Thresholds are set at 20 / 40 / 60 / 80 % of that theoretical max.
+ */
+export function calculateStarThresholds(puzzle: DailyPuzzle): StarThresholds {
+	const letters = puzzle.grid.tiles.map((t) => t.letter);
+	const avgFreq = letters.reduce((sum, l) => sum + (LETTER_FREQ[l] ?? 0), 0) / letters.length;
+	const multiplier = freqToMultiplier(avgFreq);
+	const theoreticalMax = DAILY_MOVE_BUDGET * 25 * multiplier;
+
+	return {
+		two: Math.round(theoreticalMax * 0.2),
+		three: Math.round(theoreticalMax * 0.4),
+		four: Math.round(theoreticalMax * 0.6),
+		five: Math.round(theoreticalMax * 0.8)
+	};
+}
+
+/**
+ * Returns the 1–5 star rating for a final score against the puzzle's thresholds.
+ * Always returns at least 1 (completing the puzzle awards a minimum of 1 star).
+ */
+export function getStarRating(score: number, thresholds: StarThresholds): 1 | 2 | 3 | 4 | 5 {
+	if (score >= thresholds.five) return 5;
+	if (score >= thresholds.four) return 4;
+	if (score >= thresholds.three) return 3;
+	if (score >= thresholds.two) return 2;
+	return 1;
 }

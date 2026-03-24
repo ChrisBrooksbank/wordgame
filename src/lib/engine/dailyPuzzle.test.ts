@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { mulberry32, dateToSeed, generateDailyPuzzle, todayUTC } from './dailyPuzzle.js';
+import {
+	mulberry32,
+	dateToSeed,
+	generateDailyPuzzle,
+	todayUTC,
+	DAILY_MOVE_BUDGET,
+	calculateStarThresholds,
+	getStarRating,
+	type StarThresholds
+} from './dailyPuzzle.js';
 
 describe('mulberry32', () => {
 	it('returns values in [0, 1)', () => {
@@ -126,5 +135,88 @@ describe('generateDailyPuzzle', () => {
 		const today = todayUTC();
 		const puzzle = generateDailyPuzzle();
 		expect(puzzle.date).toBe(today);
+	});
+});
+
+describe('DAILY_MOVE_BUDGET', () => {
+	it('is 15', () => {
+		expect(DAILY_MOVE_BUDGET).toBe(15);
+	});
+});
+
+describe('calculateStarThresholds', () => {
+	it('returns thresholds in strictly ascending order', () => {
+		const puzzle = generateDailyPuzzle('2026-03-24');
+		const t = calculateStarThresholds(puzzle);
+		expect(t.two).toBeLessThan(t.three);
+		expect(t.three).toBeLessThan(t.four);
+		expect(t.four).toBeLessThan(t.five);
+	});
+
+	it('all thresholds are positive', () => {
+		const puzzle = generateDailyPuzzle('2026-03-24');
+		const t = calculateStarThresholds(puzzle);
+		expect(t.two).toBeGreaterThan(0);
+		expect(t.three).toBeGreaterThan(0);
+		expect(t.four).toBeGreaterThan(0);
+		expect(t.five).toBeGreaterThan(0);
+	});
+
+	it('is deterministic for the same puzzle date', () => {
+		const p1 = generateDailyPuzzle('2026-03-24');
+		const p2 = generateDailyPuzzle('2026-03-24');
+		expect(calculateStarThresholds(p1)).toEqual(calculateStarThresholds(p2));
+	});
+
+	it('does not throw for arbitrary puzzle dates', () => {
+		for (const date of ['2026-01-01', '2026-06-15', '2027-12-31']) {
+			expect(() => calculateStarThresholds(generateDailyPuzzle(date))).not.toThrow();
+		}
+	});
+
+	it('five-star threshold is within a reasonable score range', () => {
+		const puzzle = generateDailyPuzzle('2026-03-24');
+		const t = calculateStarThresholds(puzzle);
+		// With DAILY_MOVE_BUDGET=15 and avg 5-letter words at 1x-5x, five-star
+		// should be between 60 (15*25*1*0.8*0.2=60) and 1500 (15*25*5*0.8)
+		expect(t.five).toBeGreaterThanOrEqual(60);
+		expect(t.five).toBeLessThanOrEqual(1500);
+	});
+});
+
+describe('getStarRating', () => {
+	const thresholds: StarThresholds = { two: 75, three: 150, four: 225, five: 300 };
+
+	it('returns 1 star for score below two-star threshold', () => {
+		expect(getStarRating(0, thresholds)).toBe(1);
+		expect(getStarRating(74, thresholds)).toBe(1);
+	});
+
+	it('returns 2 stars at two-star threshold', () => {
+		expect(getStarRating(75, thresholds)).toBe(2);
+		expect(getStarRating(149, thresholds)).toBe(2);
+	});
+
+	it('returns 3 stars at three-star threshold', () => {
+		expect(getStarRating(150, thresholds)).toBe(3);
+		expect(getStarRating(224, thresholds)).toBe(3);
+	});
+
+	it('returns 4 stars at four-star threshold', () => {
+		expect(getStarRating(225, thresholds)).toBe(4);
+		expect(getStarRating(299, thresholds)).toBe(4);
+	});
+
+	it('returns 5 stars at five-star threshold', () => {
+		expect(getStarRating(300, thresholds)).toBe(5);
+		expect(getStarRating(99999, thresholds)).toBe(5);
+	});
+
+	it('works with real puzzle thresholds', () => {
+		const puzzle = generateDailyPuzzle('2026-03-24');
+		const t = calculateStarThresholds(puzzle);
+		expect(getStarRating(0, t)).toBe(1);
+		expect(getStarRating(t.five, t)).toBe(5);
+		expect(getStarRating(t.five - 1, t)).toBe(4);
 	});
 });
