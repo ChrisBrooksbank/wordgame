@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+  <!-- Full-bleed background for maskable safe zone compliance -->
+  <rect width="512" height="512" fill="#030712"/>
+  <!-- Hexagon scaled to ~73% (safe zone = center 80% = 409px, content fits within) -->
+  <polygon points="256,64 432,166 432,346 256,448 80,346 80,166" fill="url(#g)"/>
+  <text x="256" y="320" text-anchor="middle" font-family="system-ui,sans-serif" font-size="220" font-weight="bold" fill="white">L</text>
+</svg>

@@ -43,6 +43,6 @@ declare module "$app/types" {
 		};
 		Pathname(): "/" | "/architect" | "/cascade" | "/daily" | "/memory" | "/rush";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/favicon.png" | "/favicon.svg" | "/icons/icon.svg" | "/manifest.webmanifest" | string & {};
+		Asset(): "/favicon.png" | "/favicon.svg" | "/icons/icon-128.png" | "/icons/icon-144.png" | "/icons/icon-192.png" | "/icons/icon-48.png" | "/icons/icon-512.png" | "/icons/icon-72.png" | "/icons/icon-96.png" | "/icons/icon-maskable-128.png" | "/icons/icon-maskable-144.png" | "/icons/icon-maskable-192.png" | "/icons/icon-maskable-48.png" | "/icons/icon-maskable-512.png" | "/icons/icon-maskable-72.png" | "/icons/icon-maskable-96.png" | "/icons/icon-maskable.svg" | "/icons/icon.svg" | "/manifest.webmanifest" | string & {};
 	}
 }

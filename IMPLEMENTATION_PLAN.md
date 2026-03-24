@@ -44,7 +44,7 @@
 
 ### Phase 5: PWA Infrastructure
 
-- [ ] Create complete Web App Manifest with all icon sizes (48-512px) and maskable variant (spec: 04-pwa-infrastructure.md)
+- [x] Create complete Web App Manifest with all icon sizes (48-512px) and maskable variant (spec: 04-pwa-infrastructure.md)
 - [ ] Integrate Workbox service worker: cache-first for static assets and DAWG binary, network-first for dynamic data (spec: 04-pwa-infrastructure.md)
 - [ ] Implement offline detection: graceful degradation UI, disable network-dependent features when offline (spec: 04-pwa-infrastructure.md)
 - [ ] Implement custom install prompt: show after 3rd session or 2nd Daily Forge completion (spec: 04-pwa-infrastructure.md)
