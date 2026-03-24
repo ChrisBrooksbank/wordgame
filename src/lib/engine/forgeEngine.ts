@@ -13,7 +13,7 @@ export interface ForgeResult {
 	word: string;
 }
 
-export type SubmitFailReason = 'too_short' | 'not_a_word';
+export type SubmitFailReason = 'too_short' | 'not_a_word' | 'catalyst_not_used';
 
 export interface SubmitResult {
 	success: boolean;
@@ -101,7 +101,8 @@ export function applyGravity(
  *
  * Validation order:
  *  1. Path must contain at least 3 tiles
- *  2. The word formed must pass `isValidWord`
+ *  2. If `catalystCoord` is provided, the path must include that coordinate
+ *  3. The word formed must pass `isValidWord`
  *
  * On success, consumes the path tiles and applies gravity to produce the
  * new grid state.
@@ -110,10 +111,19 @@ export function submitWord(
 	grid: HexGrid,
 	path: HexCoord[],
 	isValidWord: (word: string) => boolean,
-	rng: () => number
+	rng: () => number,
+	catalystCoord?: HexCoord
 ): SubmitResult {
 	if (path.length < 3) {
 		return { success: false, reason: 'too_short' };
+	}
+
+	if (catalystCoord !== undefined) {
+		const catalystKey = hexKey(catalystCoord);
+		const pathIncludesCatalyst = path.some((coord) => hexKey(coord) === catalystKey);
+		if (!pathIncludesCatalyst) {
+			return { success: false, reason: 'catalyst_not_used' };
+		}
 	}
 
 	const word = pathToWord(grid, path);

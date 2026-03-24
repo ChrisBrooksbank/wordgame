@@ -286,6 +286,46 @@ describe('submitWord', () => {
 		}
 	});
 
+	describe('catalyst letter enforcement', () => {
+		const catalystCoord: HexCoord = { q: 0, r: 0 };
+		const pathWithCatalyst: HexCoord[] = [
+			{ q: 0, r: 0 }, // catalyst
+			{ q: 1, r: 0 },
+			{ q: 1, r: 1 }
+		];
+		const pathWithoutCatalyst: HexCoord[] = [
+			{ q: 1, r: 0 },
+			{ q: 1, r: 1 },
+			{ q: 0, r: 1 }
+		];
+
+		it('accepts word when catalyst coord is in path', () => {
+			const rng = makeMockRng();
+			const result = submitWord(grid, pathWithCatalyst, alwaysValid, rng, catalystCoord);
+			expect(result.success).toBe(true);
+		});
+
+		it('rejects word when catalyst coord is not in path', () => {
+			// Add tile for (0,1) if needed — grid already has all 4x4 coords
+			const rng = makeMockRng();
+			const result = submitWord(grid, pathWithoutCatalyst, alwaysValid, rng, catalystCoord);
+			expect(result.success).toBe(false);
+			expect(result.reason).toBe('catalyst_not_used');
+		});
+
+		it('catalyst rejection happens before word validation', () => {
+			const rng = makeMockRng();
+			const result = submitWord(grid, pathWithoutCatalyst, alwaysInvalid, rng, catalystCoord);
+			expect(result.reason).toBe('catalyst_not_used');
+		});
+
+		it('no catalyst coord provided → no enforcement', () => {
+			const rng = makeMockRng();
+			const result = submitWord(grid, pathWithoutCatalyst, alwaysValid, rng);
+			expect(result.success).toBe(true);
+		});
+	});
+
 	it('does not mutate the original grid', () => {
 		const originalTileCount = grid.tiles.length;
 		const originalFirstLetter = grid.tiles[0].letter;
