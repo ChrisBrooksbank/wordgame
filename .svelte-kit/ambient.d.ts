@@ -99,7 +99,6 @@ declare module '$env/static/private' {
 	export const NVM_HOME: string;
 	export const NVM_SYMLINK: string;
 	export const OculusBase: string;
-	export const OLDPWD: string;
 	export const OneDrive: string;
 	export const OneDriveConsumer: string;
 	export const OS: string;
@@ -286,7 +285,6 @@ declare module '$env/dynamic/private' {
 		NVM_HOME: string;
 		NVM_SYMLINK: string;
 		OculusBase: string;
-		OLDPWD: string;
 		OneDrive: string;
 		OneDriveConsumer: string;
 		OS: string;

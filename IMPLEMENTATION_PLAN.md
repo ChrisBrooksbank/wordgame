@@ -26,7 +26,7 @@
 
 ### Phase 3: Daily Forge Mode
 
-- [ ] Implement seeded PRNG (mulberry32) and daily puzzle generator: deterministic tile layout from date string (spec: 02-daily-forge.md)
+- [x] Implement seeded PRNG (mulberry32) and daily puzzle generator: deterministic tile layout from date string (spec: 02-daily-forge.md)
 - [ ] Implement Catalyst Letter mechanic: center tile designation, enforce center tile in every word path (spec: 02-daily-forge.md)
 - [ ] Implement 15-move budget tracker and 1-5 star rating system based on score thresholds (spec: 02-daily-forge.md)
 - [ ] Build Daily Forge game screen: 5x5 hex grid, move counter, score display, end-of-game summary (spec: 02-daily-forge.md)
