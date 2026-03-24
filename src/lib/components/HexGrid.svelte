@@ -14,10 +14,22 @@
 		selectedPath?: HexCoord[];
 		tileSize?: number;
 		catalystCoord?: HexCoord;
+		/** Keys (hexKey) of tiles to highlight during heat meter activation. */
+		highlightedTiles?: Set<string>;
+		/** Heat level 0–1 for glow intensity effect. */
+		heatLevel?: number;
 		ontileclick?: (_c: HexCoord) => void;
 	}
 
-	let { grid, selectedPath = [], tileSize = 40, catalystCoord, ontileclick }: Props = $props();
+	let {
+		grid,
+		selectedPath = [],
+		tileSize = 40,
+		catalystCoord,
+		highlightedTiles,
+		heatLevel = 0,
+		ontileclick
+	}: Props = $props();
 
 	const coords = $derived(gridCoords(grid.size));
 
@@ -38,7 +50,8 @@
 				selectedPath.length > 0 && hexKey(selectedPath[selectedPath.length - 1]) === key;
 			const canAdd = !isSelected && canExtendPath(selectedPath, tile.coord);
 			const isCatalyst = catalystKey !== null && key === catalystKey;
-			return { ...tile, center, points, isSelected, isLast, canAdd, isCatalyst };
+			const isHeatHighlighted = highlightedTiles ? highlightedTiles.has(key) : false;
+			return { ...tile, center, points, isSelected, isLast, canAdd, isCatalyst, isHeatHighlighted };
 		})
 	);
 
@@ -59,6 +72,9 @@
 	xmlns="http://www.w3.org/2000/svg"
 	role="img"
 	aria-label="Hexagonal letter grid"
+	style="filter: {heatLevel > 0
+		? `drop-shadow(0 0 ${(heatLevel * 8).toFixed(1)}px rgba(249,115,22,${(heatLevel * 0.6).toFixed(2)}))`
+		: 'none'}"
 >
 	{#each renderedTiles as tile (tile.id)}
 		<g
@@ -80,15 +96,19 @@
 						? '#f59e0b'
 						: tile.isCatalyst
 							? '#1c2a1c'
-							: '#1f2937'}
+							: tile.isHeatHighlighted
+								? '#1a2e1a'
+								: '#1f2937'}
 				stroke={tile.isSelected
 					? '#f97316'
 					: tile.isCatalyst
 						? '#fbbf24'
-						: tile.canAdd
-							? '#6b7280'
-							: '#374151'}
-				stroke-width={tile.isCatalyst || tile.canAdd ? '3' : '2'}
+						: tile.isHeatHighlighted
+							? '#4ade80'
+							: tile.canAdd
+								? '#6b7280'
+								: '#374151'}
+				stroke-width={tile.isCatalyst || tile.isHeatHighlighted || tile.canAdd ? '3' : '2'}
 			/>
 			<text
 				x={tile.center.x}

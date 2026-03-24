@@ -14,6 +14,8 @@
 		MAX_COMBO
 	} from '$lib/engine/combo.js';
 	import type { ComboState } from '$lib/engine/combo.js';
+	import { initialHeatState, addHeat, tickHeat, findLongWordTiles } from '$lib/engine/heatMeter.js';
+	import type { HeatState } from '$lib/engine/heatMeter.js';
 
 	// -------------------------------------------------------------------------
 	// Constants
@@ -49,6 +51,11 @@
 	let comboState = $state<ComboState>(initialComboState());
 	/** Remaining combo window in ms, updated every tick. */
 	let comboTimerMs = $state(0);
+
+	// Heat meter
+	let heatState = $state<HeatState>(initialHeatState(() => Math.random()));
+	/** Tile keys (hexKey) highlighted during max-heat activation. */
+	let highlightedTiles = $state<Set<string>>(new Set());
 
 	// Feedback
 	let feedback = $state<string | null>(null);
@@ -117,6 +124,13 @@
 				if (comboTimerMs === 0) {
 					comboState = initialComboState();
 				}
+			}
+			// Tick heat meter
+			const prevActive = heatState.isActive;
+			heatState = tickHeat(heatState, elapsed, now);
+			// Clear tile highlights when activation ends
+			if (prevActive && !heatState.isActive) {
+				highlightedTiles = new Set();
 			}
 			if (timeRemainingMs === 0) {
 				stopTimer();
@@ -191,6 +205,23 @@
 			wordsFound = [...wordsFound, { word, points }];
 			path = [];
 
+			// Update heat meter
+			const { newState: newHeat, triggered } = addHeat(
+				heatState,
+				word.length,
+				comboMultiplier,
+				Date.now(),
+				() => Math.random()
+			);
+			heatState = newHeat;
+			if (triggered && validator && grid) {
+				highlightedTiles = findLongWordTiles(
+					grid,
+					(w) => validator!.isWord(w),
+					(p) => validator!.isPrefix(p)
+				);
+			}
+
 			const rarityEmoji: Record<string, string> = {
 				common: '',
 				uncommon: '✦',
@@ -223,6 +254,7 @@
 		stopTimer();
 		gameOver = true;
 		path = [];
+		highlightedTiles = new Set();
 	}
 
 	// -------------------------------------------------------------------------
@@ -242,6 +274,8 @@
 		gameOver = false;
 		comboState = initialComboState();
 		comboTimerMs = 0;
+		heatState = initialHeatState(() => Math.random());
+		highlightedTiles = new Set();
 	}
 </script>
 
@@ -368,9 +402,42 @@
 			{/if}
 		</div>
 
+		<!-- Heat meter -->
+		<div class="w-full max-w-md">
+			<div class="flex items-center justify-between px-1 pb-1">
+				<span class="text-xs text-gray-500">Heat</span>
+				{#if heatState.isActive}
+					<span class="text-xs font-bold text-green-400 animate-pulse"
+						>HEAT MAX — Long words lit!</span
+					>
+				{/if}
+			</div>
+			<div class="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+				<div
+					class="h-full rounded-full transition-all duration-200"
+					class:bg-yellow-500={heatState.heat < 0.5}
+					class:bg-orange-500={heatState.heat >= 0.5 && heatState.heat < 0.8}
+					class:bg-red-500={heatState.heat >= 0.8}
+					class:animate-pulse={heatState.isActive}
+					style="width: {heatState.isActive
+						? 100
+						: ((heatState.heat / heatState.activationThreshold) * 100).toFixed(
+								1
+							)}%; {heatState.isActive ? 'background: #4ade80;' : ''}"
+				></div>
+			</div>
+		</div>
+
 		<!-- Hex grid -->
 		<div class="w-full max-w-md">
-			<HexGrid {grid} selectedPath={path} tileSize={46} ontileclick={handleTileClick} />
+			<HexGrid
+				{grid}
+				selectedPath={path}
+				tileSize={46}
+				{highlightedTiles}
+				heatLevel={heatState.heat}
+				ontileclick={handleTileClick}
+			/>
 		</div>
 
 		<!-- Current word / feedback display -->
