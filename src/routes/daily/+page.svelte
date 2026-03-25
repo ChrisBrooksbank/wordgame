@@ -17,6 +17,8 @@
 	import { recordDailyForgeCompletion } from '$lib/pwa/installPrompt.js';
 	import ForgeShareCard from '$lib/components/ForgeShareCard.svelte';
 	import ForgeWheel from '$lib/components/ForgeWheel.svelte';
+	import PushNotificationOptIn from '$lib/components/PushNotificationOptIn.svelte';
+	import { PUBLIC_PUSH_WORKER_URL } from '$env/static/public';
 	import { loadSpinResult } from '$lib/engine/forgeWheel.js';
 	import type { SpinResult } from '$lib/engine/forgeWheel.js';
 
@@ -290,6 +292,7 @@
 					wheelSpinResult = r;
 				}}
 			/>
+			<PushNotificationOptIn workerUrl={PUBLIC_PUSH_WORKER_URL} />
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
 	{:else if gameOver && previousResult}
@@ -324,6 +327,7 @@
 					wheelSpinResult = r;
 				}}
 			/>
+			<PushNotificationOptIn workerUrl={PUBLIC_PUSH_WORKER_URL} />
 			<p class="text-sm text-gray-600">Come back tomorrow for a new puzzle!</p>
 		</div>
 	{:else if grid && puzzle}

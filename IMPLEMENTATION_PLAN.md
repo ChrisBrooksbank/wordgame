@@ -66,7 +66,7 @@
 ### Phase 8: Push Notifications (Cloudflare Workers)
 
 - [x] Deploy Cloudflare Worker for push notification delivery: daily reminders and streak-warning alerts (spec: 04-pwa-infrastructure.md)
-- [ ] Implement push subscription opt-in flow on frontend, store subscription in Cloudflare KV (spec: 04-pwa-infrastructure.md)
+- [x] Implement push subscription opt-in flow on frontend, store subscription in Cloudflare KV (spec: 04-pwa-infrastructure.md)
 
 ## Completed
 
