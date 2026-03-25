@@ -226,7 +226,8 @@ function main(): void {
 const isMain =
 	typeof process !== 'undefined' &&
 	process.argv[1] != null &&
-	fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+	(fileURLToPath(import.meta.url) === resolve(process.argv[1]) ||
+		process.argv[1].endsWith('buildWordList.ts'));
 
 if (isMain) {
 	main();
