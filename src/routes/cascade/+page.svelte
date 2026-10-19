@@ -4,7 +4,7 @@
 	import { loadWordValidator } from '$lib/engine/wordValidator.js';
 	import { mulberry32 } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord } from '$lib/engine/hexGrid.js';
-	import { hexKey } from '$lib/engine/hexGrid.js';
+	import { hexKey, pathAfterTap } from '$lib/engine/hexGrid.js';
 	import {
 		initialCascadeState,
 		submitCascadeWord,
@@ -75,18 +75,7 @@
 	function handleTileClick(coord: HexCoord) {
 		if (gameOver || !grid) return;
 
-		const key = hexKey(coord);
-		const alreadyInPath = path.some((c) => hexKey(c) === key);
-
-		if (alreadyInPath) {
-			// Clicking last tile clears path; clicking earlier tile does nothing
-			if (hexKey(path[path.length - 1]) === key) {
-				path = [];
-			}
-			return;
-		}
-
-		path = [...path, coord];
+		path = pathAfterTap(path, coord);
 	}
 
 	function showFeedback(msg: string, type: 'success' | 'error' | 'cascade') {

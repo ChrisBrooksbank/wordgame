@@ -12,7 +12,7 @@
 	import { submitWord, pathToWord } from '$lib/engine/forgeEngine.js';
 	import { mulberry32, dateToSeed } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord } from '$lib/engine/hexGrid.js';
-	import { hexKey } from '$lib/engine/hexGrid.js';
+	import { pathAfterTap } from '$lib/engine/hexGrid.js';
 	import { get as idbGet, set as idbSet } from 'idb-keyval';
 	import { recordDailyForgeCompletion } from '$lib/pwa/installPrompt.js';
 	import ForgeShareCard from '$lib/components/ForgeShareCard.svelte';
@@ -134,18 +134,7 @@
 	function handleTileClick(coord: HexCoord) {
 		if (gameOver || !grid) return;
 
-		const key = hexKey(coord);
-		const alreadyInPath = path.some((c) => hexKey(c) === key);
-
-		if (alreadyInPath) {
-			// If clicking the last tile, clear the path
-			if (hexKey(path[path.length - 1]) === key) {
-				path = [];
-			}
-			return;
-		}
-
-		path = [...path, coord];
+		path = pathAfterTap(path, coord);
 	}
 
 	// -------------------------------------------------------------------------

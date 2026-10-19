@@ -4,7 +4,7 @@
 	import { loadWordValidator } from '$lib/engine/wordValidator.js';
 	import { mulberry32 } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord } from '$lib/engine/hexGrid.js';
-	import { hexKey } from '$lib/engine/hexGrid.js';
+	import { pathAfterTap } from '$lib/engine/hexGrid.js';
 	import { pathToWord } from '$lib/engine/forgeEngine.js';
 	import {
 		initialMemoryState,
@@ -111,17 +111,7 @@
 	function handleTileClick(coord: HexCoord) {
 		if (!gameState || gameState.phase !== 'play') return;
 
-		const key = hexKey(coord);
-		const alreadyInPath = path.some((c) => hexKey(c) === key);
-
-		if (alreadyInPath) {
-			if (hexKey(path[path.length - 1]) === key) {
-				path = [];
-			}
-			return;
-		}
-
-		path = [...path, coord];
+		path = pathAfterTap(path, coord);
 	}
 
 	// -------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 	import { submitWord, pathToWord } from '$lib/engine/forgeEngine.js';
 	import { mulberry32 } from '$lib/engine/dailyPuzzle.js';
 	import type { HexCoord, HexGrid as HexGridType } from '$lib/engine/hexGrid.js';
-	import { hexKey } from '$lib/engine/hexGrid.js';
+	import { pathAfterTap } from '$lib/engine/hexGrid.js';
 	import {
 		initialComboState,
 		recordWord as recordComboWord,
@@ -190,17 +190,7 @@
 			startTimer();
 		}
 
-		const key = hexKey(coord);
-		const alreadyInPath = path.some((c) => hexKey(c) === key);
-
-		if (alreadyInPath) {
-			if (hexKey(path[path.length - 1]) === key) {
-				path = [];
-			}
-			return;
-		}
-
-		path = [...path, coord];
+		path = pathAfterTap(path, coord);
 	}
 
 	// -------------------------------------------------------------------------

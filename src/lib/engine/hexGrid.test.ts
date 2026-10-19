@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
+	pathAfterTap,
 	hexNeighbors,
 	hexEqual,
 	hexAdjacent,
@@ -356,5 +357,23 @@ describe('weightedRandomLetter', () => {
 			if (l === 'Z') zCount++;
 		}
 		expect(eCount).toBeGreaterThan(zCount);
+	});
+});
+
+describe('pathAfterTap', () => {
+	const a = { q: 0, r: 0 };
+	const b = { q: 1, r: 0 };
+	const far = { q: -2, r: 2 };
+
+	it('extends with an adjacent tile', () => {
+		expect(pathAfterTap([a], b)).toEqual([a, b]);
+	});
+
+	it('undoes the last tile when tapped', () => {
+		expect(pathAfterTap([a, b], b)).toEqual([a]);
+	});
+
+	it('restarts from a non-adjacent tile', () => {
+		expect(pathAfterTap([a, b], far)).toEqual([far]);
 	});
 });

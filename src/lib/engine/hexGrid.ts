@@ -289,3 +289,15 @@ export function canExtendPath(path: HexCoord[], coord: HexCoord): boolean {
 	if (path.some((c) => hexKey(c) === key)) return false;
 	return hexAdjacent(path[path.length - 1], coord);
 }
+
+/**
+ * Returns the path after the player taps `coord`:
+ * - tapping the last tile undoes it
+ * - tapping an adjacent unused tile extends the path
+ * - tapping any other tile starts a new path from that tile
+ */
+export function pathAfterTap(path: HexCoord[], coord: HexCoord): HexCoord[] {
+	if (path.length > 0 && hexEqual(path[path.length - 1], coord)) return path.slice(0, -1);
+	if (canExtendPath(path, coord)) return [...path, coord];
+	return [coord];
+}
