@@ -1,5 +1,9 @@
 # Lexicon Forge
 
+<!-- hub-link -->
+> Part of [Chris's app hub](https://chrisbrooksbank-hub.netlify.app) - a directory of all my deployed apps.
+<!-- /hub-link -->
+
 A word forging game built with SvelteKit, featuring hexagonal tile grids and multiple game modes.
 
 **Play now:** https://lexicon-wordforge.netlify.app
